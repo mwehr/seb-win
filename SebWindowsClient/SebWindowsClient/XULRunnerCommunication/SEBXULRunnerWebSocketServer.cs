@@ -2,7 +2,9 @@
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Windows.Forms;
@@ -14,13 +16,36 @@ using SebWindowsClient.DiagnosticsUtils;
 
 namespace SebWindowsClient.XULRunnerCommunication
 {
-	/// <summary>
-	/// WebSocket Server to communicate with the XULRunner
-	/// </summary>
-	public class SEBXULRunnerWebSocketServer
+    /// <summary>
+    /// WebSocket Server to communicate with the XULRunner
+    /// </summary>
+    public class SEBXULRunnerWebSocketServer
     {
-		private static readonly object AdditionalResourceHandlerLock = new object();
+        private static readonly object AdditionalResourceHandlerLock = new object();
         public static bool Started = false;
+
+        public static string lockFile = "port.lock";
+        private static int acquirePortTimeSpan = 1;  //min
+        private static int port = 0;
+        private static string _serverAdress = null;
+
+        /// <summary>
+        /// Get free random port
+        /// </summary>
+        static int acquirePort()
+        {
+            TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            // if 57016 get another one
+            if (port == 57016)
+            {
+                listener.Stop();
+                acquirePort();
+            }
+            listener.Stop();
+            return port;
+        }
 
         /// <summary>
         /// The URL to connect to
@@ -29,7 +54,11 @@ namespace SebWindowsClient.XULRunnerCommunication
         {
             get
             {
-                return String.Format("ws://localhost:{0}",port);
+                if (SEBXULRunnerWebSocketServer._serverAdress == null)
+                {
+                    SEBXULRunnerWebSocketServer.StartServer();
+                }
+                return SEBXULRunnerWebSocketServer._serverAdress;
             }
         }
 
@@ -58,7 +87,7 @@ namespace SebWindowsClient.XULRunnerCommunication
 
         public static bool HasBeenReconfiguredByMessage = false;
 
-		public static event EventHandler OnXulRunnerClearClipboard;
+        public static event EventHandler OnXulRunnerClearClipboard;
         public static event EventHandler OnXulRunnerCloseRequested;
         public static event EventHandler OnXulRunnerQuitLinkClicked;
         public static event EventHandler OnXulRunnerTextFocus;
@@ -69,7 +98,6 @@ namespace SebWindowsClient.XULRunnerCommunication
 
         private static IWebSocketConnection XULRunner;
 
-        private static int port = 8706;
         private static WebSocketServer server;
 
         private static ConcurrentQueue<SEBXULMessage> messageQueue = new ConcurrentQueue<SEBXULMessage>();
@@ -84,33 +112,65 @@ namespace SebWindowsClient.XULRunnerCommunication
             if (IsRunning && Started)
                 return;
 
-            if (IsRunning)
-            {
-                for (int i = 0; i < 60; i++)
-                {
-                    if (!IsRunning)
-                        break;
-
-                    Thread.Sleep(1000);
-                }
-                if (IsRunning)
-                    SEBMessageBox.Show(SEBUIStrings.alertWebSocketPortBlocked, SEBUIStrings.alertWebSocketPortBlockedMessage, MessageBoxIcon.Error, MessageBoxButtons.OK);
-            }
-
             try
             {
-                Logger.AddInformation("Starting WebSocketServer on " + ServerAddress);
-                server = new WebSocketServer(ServerAddress);
-                FleckLog.Level = LogLevel.Debug;
-                server.Start(socket =>
+
+                var lockFilePath = SEBClientInfo.SebClientSettingsProgramDataDirectory + lockFile;
+                int elapsed = 0;
+                TimeSpan timeSpan = TimeSpan.FromMinutes(SEBXULRunnerWebSocketServer.acquirePortTimeSpan);
+                // try to get new port, break on successfully port aquire or timespan exceeded
+                do
                 {
-                    socket.OnOpen = () => OnClientConnected(socket);
-                    socket.OnClose = OnClientDisconnected;
-                    socket.OnMessage = OnClientMessage;
-                    socket.OnBinary = OnClientMessageBinary;
-                });
-                Logger.AddInformation("Started WebSocketServer on " + ServerAddress);
-                Started = true;
+                    try
+                    {
+                        // create lock fpr port aquire task
+                        using (FileStream lockFile = new FileStream(
+                            lockFilePath,
+                            FileMode.OpenOrCreate,
+                            FileAccess.ReadWrite,
+                            FileShare.Delete))
+
+                        {
+                            SEBXULRunnerWebSocketServer.port = SEBXULRunnerWebSocketServer.acquirePort();
+                            SEBXULRunnerWebSocketServer._serverAdress = String.Format("ws://localhost:{0}", SEBXULRunnerWebSocketServer.port);
+                            Logger.AddInformation("Starting WebSocketServer on " + SEBXULRunnerWebSocketServer._serverAdress);
+                            server = new WebSocketServer(ServerAddress);
+                            FleckLog.Level = LogLevel.Debug;
+                            server.Start(socket =>
+                            {
+                                socket.OnOpen = () => OnClientConnected(socket);
+                                socket.OnClose = OnClientDisconnected;
+                                socket.OnMessage = OnClientMessage;
+                                socket.OnBinary = OnClientMessageBinary;
+                            });
+                            Logger.AddInformation("Started WebSocketServer on " + SEBXULRunnerWebSocketServer._serverAdress);
+                            Started = true;
+
+                            File.Delete(lockFilePath);
+                        }
+                    }
+                    catch (IOException ioEx)
+                    {
+                        // create SEB programm data dir if missing
+                        if (ioEx.HResult == -2147024893)
+                        {
+                            Directory.CreateDirectory(SEBClientInfo.SebClientSettingsProgramDataDirectory);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // delete File in case of Exception
+                        File.Delete(lockFilePath);
+                    }
+                    // wait for 1 sec
+                    Thread.Sleep(1000);
+                    elapsed += 1;
+                } while ((SEBXULRunnerWebSocketServer.port == 0) && (elapsed <= timeSpan.TotalSeconds));
+
+                if (elapsed >= timeSpan.TotalSeconds)
+                {
+                    Logger.AddInformation("Couldn't get websocket port!");
+                }
             }
             catch (Exception ex)
             {
@@ -134,7 +194,7 @@ namespace SebWindowsClient.XULRunnerCommunication
             HasBeenReconfiguredByMessage = true;
             Logger.AddInformation("Received downloaded Config File data, " + obj.Length + " bytes. Sending command SebFileTransfer to browser");
             SEBXULRunnerWebSocketServer.SendMessage(new SEBXULMessage(SEBXULMessage.SEBXULHandler.SebFileTransfer, true));
-            if(SEBClientInfo.SebWindowsClientForm.ReconfigureWithSettings(obj))
+            if (SEBClientInfo.SebWindowsClientForm.ReconfigureWithSettings(obj))
             {
                 Logger.AddInformation("SEB was successfully reconfigured using the downloaded Config File data");
 
@@ -182,7 +242,7 @@ namespace SebWindowsClient.XULRunnerCommunication
 
             while (XULRunner != null && !messageQueue.IsEmpty)
             {
-				messageQueue.TryDequeue(out var message);
+                messageQueue.TryDequeue(out var message);
                 SendMessage(message);
             }
         }
@@ -210,7 +270,7 @@ namespace SebWindowsClient.XULRunnerCommunication
 
         private static void OnClientMessage(string message)
         {
-            
+
             Console.WriteLine("RECV: " + message);
             Logger.AddInformation("WebSocket: Received message: " + message);
 
@@ -220,13 +280,13 @@ namespace SebWindowsClient.XULRunnerCommunication
                 switch (sebxulMessage.Handler)
                 {
                     case SEBXULMessage.SEBXULHandler.AdditionalRessourceTriggered:
-						lock (AdditionalResourceHandlerLock)
-						{
-							if (additionalResourceHandler == null)
-							{
-								additionalResourceHandler = new AdditionalResourceHandler();
-							}
-						}
+                        lock (AdditionalResourceHandlerLock)
+                        {
+                            if (additionalResourceHandler == null)
+                            {
+                                additionalResourceHandler = new AdditionalResourceHandler();
+                            }
+                        }
                         additionalResourceHandler.OpenAdditionalResourceById(sebxulMessage.Opts["Id"].ToString());
                         break;
                     case SEBXULMessage.SEBXULHandler.FullScreenChanged:
@@ -238,9 +298,9 @@ namespace SebWindowsClient.XULRunnerCommunication
                     case SEBXULMessage.SEBXULHandler.ReconfigureSuccess:
                         SEBClientInfo.SebWindowsClientForm.ClosePreviousMainWindow();
                         break;
-					case SEBXULMessage.SEBXULHandler.ClearClipboard:
-						OnXulRunnerClearClipboard?.Invoke(null, EventArgs.Empty);
-						break;
+                    case SEBXULMessage.SEBXULHandler.ClearClipboard:
+                        OnXulRunnerClearClipboard?.Invoke(null, EventArgs.Empty);
+                        break;
 
                 }
             }
@@ -267,7 +327,7 @@ namespace SebWindowsClient.XULRunnerCommunication
                         break;
                 }
             }
-                
+
         }
 
         [Obsolete("Window gets resized by SEB not seb")]
@@ -296,9 +356,9 @@ namespace SebWindowsClient.XULRunnerCommunication
             SendMessage(new SEBXULMessage(SEBXULMessage.SEBXULHandler.Reload));
         }
 
-		public static void SendUserSwitchLockScreen()
-		{
-			SendMessage(new SEBXULMessage(SEBXULMessage.SEBXULHandler.UserSwitchLockScreen));
-		}
+        public static void SendUserSwitchLockScreen()
+        {
+            SendMessage(new SEBXULMessage(SEBXULMessage.SEBXULHandler.UserSwitchLockScreen));
+        }
     }
 }

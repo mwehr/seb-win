@@ -88,7 +88,7 @@ namespace SebWindowsClient
 
 		public Process xulRunner = new Process();
 		private int xulRunnerExitCode;
-        private IntPtr xulRunnerWindowHandle = IntPtr.Zero;
+		private IntPtr xulRunnerWindowHandle = IntPtr.Zero;
 
 		public List<string> permittedProcessesCalls = new List<string>();
 		public List<Process> permittedProcessesReferences = new List<Process>();
@@ -139,7 +139,7 @@ namespace SebWindowsClient
 
 		private void OnXULRunnerShutdDownRequested(object sender, EventArgs e)
 		{
-			if ((bool) SEBSettings.settingsCurrent[SEBSettings.KeyAllowQuit])
+			if ((bool)SEBSettings.settingsCurrent[SEBSettings.KeyAllowQuit])
 			{
 				Logger.AddInformation("Receiving Shutdown Request and opening ShowCloseDialogForm");
 				this.BeginInvoke(new Action(this.ShowCloseDialogForm));
@@ -167,7 +167,8 @@ namespace SebWindowsClient
 
 			if (args.Length > 1)
 			{
-				if (!LoadFile(args[1])) {
+				if (!LoadFile(args[1]))
+				{
 					Logger.AddError("LoadFile() in OnLoad() failed, exiting SEB!", null, null);
 					ExitApplication();
 				}
@@ -189,8 +190,8 @@ namespace SebWindowsClient
 						SebWindowsClientMain.clientSettingsSet = true;
 						Logger.AddInformation("SEB client configuration set in LoadFile(URI).", null, null);
 					}
-                }
-                byte[] sebSettings = null;
+				}
+				byte[] sebSettings = null;
 				Uri uri;
 				try
 				{
@@ -211,14 +212,14 @@ namespace SebWindowsClient
 					return false;
 				}
 
-                // Check if settings forbid to open SEB Config Files
-                if ((bool)SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyDownloadAndOpenSebConfig) == false)
-                {
-                    SEBMessageBox.Show(SEBUIStrings.cannotOpenSEBConfig, SEBUIStrings.cannotOpenSEBConfigMessage, MessageBoxIcon.Error, MessageBoxButtons.OK);
-                    return false;
-                }
+				// Check if settings forbid to open SEB Config Files
+				if ((bool)SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyDownloadAndOpenSebConfig) == false)
+				{
+					SEBMessageBox.Show(SEBUIStrings.cannotOpenSEBConfig, SEBUIStrings.cannotOpenSEBConfigMessage, MessageBoxIcon.Error, MessageBoxButtons.OK);
+					return false;
+				}
 
-                if (uri.Scheme == "seb" || uri.Scheme == "sebs")
+				if (uri.Scheme == "seb" || uri.Scheme == "sebs")
 				// The URI is holding a seb:// or sebs:// (secure) web address for a .seb settings file: download it
 				{
 					// But only download and use the seb:// link to a .seb file if this is enabled
@@ -287,10 +288,10 @@ namespace SebWindowsClient
 						{
 							SEBMessageBox.Show(SEBUIStrings.cannotOpenSEBLink, SEBUIStrings.cannotOpenSEBLinkMessage, MessageBoxIcon.Error, MessageBoxButtons.OK);
 							//MessageBox.Show(new Form() { TopMost = true }, "Unable to follow the link!");
-							Logger.AddError("Unable to download a file from the "+ file + " link", this, ex);
+							Logger.AddError("Unable to download a file from the " + file + " link", this, ex);
 						}
 
-						
+
 						//sebSettings seems to be some other content. There may be an authentication necessary to download the file, redirect the user to the website
 						Logger.AddInformation("The downloaded content is not a seb file, there may be an authentication necessary to get the file.");
 						SEBSettings.settingsCurrent[SEBSettings.KeyStartURL] = uri.ToString();
@@ -314,7 +315,7 @@ namespace SebWindowsClient
 
 						SebWindowsClientMain.CloseSplash();
 						return true;
-					}                    
+					}
 				}
 				else if (uri.IsFile)
 				{
@@ -380,14 +381,14 @@ namespace SebWindowsClient
 					ExitApplication();
 					return false;
 				}
-                //SEBSplashScreen.CloseSplash();
+				//SEBSplashScreen.CloseSplash();
 
-                // Convert new URL Filter rules to XUL seb2 rules
-                // and add Start URL to allowed rules
-                SEBURLFilter urlFilter = new SEBURLFilter();
-                urlFilter.UpdateFilterRules();
+				// Convert new URL Filter rules to XUL seb2 rules
+				// and add Start URL to allowed rules
+				SEBURLFilter urlFilter = new SEBURLFilter();
+				urlFilter.UpdateFilterRules();
 
-                if (fromFile && !wasStartup)
+				if (fromFile && !wasStartup)
 				{
 					var xulRunnerSettings = DeepClone(SEBSettings.settingsCurrent);
 					var xulRunnerParameters = SEBXulRunnerSettings.XULRunnerConfigDictionarySerialize(xulRunnerSettings);
@@ -403,7 +404,7 @@ namespace SebWindowsClient
 
 			if (InvokeRequired)
 			{
-				return (bool) Invoke(reconfigure);
+				return (bool)Invoke(reconfigure);
 			}
 			else
 			{
@@ -428,23 +429,23 @@ namespace SebWindowsClient
 			catch (Exception)
 			{
 			}
-				
+
 			//}
 		}
 
 
-        /// ----------------------------------------------------------------------------------------
-        /// <summary>
-        /// Show an alert that reconfiguring SEB isn't allowed, because running in exam mode
-        /// </summary>
-        /// ----------------------------------------------------------------------------------------
-        public static void ShowReconfigureNotAllowed()
-        {
-            SEBMessageBox.Show(SEBUIStrings.loadingSettingsNotAllowed, SEBUIStrings.loadingSettingsNotAllowedReason, MessageBoxIcon.Error, MessageBoxButtons.OK);
-        }
+		/// ----------------------------------------------------------------------------------------
+		/// <summary>
+		/// Show an alert that reconfiguring SEB isn't allowed, because running in exam mode
+		/// </summary>
+		/// ----------------------------------------------------------------------------------------
+		public static void ShowReconfigureNotAllowed()
+		{
+			SEBMessageBox.Show(SEBUIStrings.loadingSettingsNotAllowed, SEBUIStrings.loadingSettingsNotAllowedReason, MessageBoxIcon.Error, MessageBoxButtons.OK);
+		}
 
 
-        private static T DeepClone<T>(T obj)
+		private static T DeepClone<T>(T obj)
 		{
 			using (var ms = new MemoryStream())
 			{
@@ -469,16 +470,18 @@ namespace SebWindowsClient
 
 			string xulRunnerPath = "";
 			string desktopName = "";
-			if (userDefinedArguments == null) userDefinedArguments="";
+			if (userDefinedArguments == null) userDefinedArguments = "";
 			try
 			{
-                // Convert new URL Filter rules to XUL seb2 rules
-                // and add Start URL to allowed rules
-                SEBURLFilter urlFilter = new SEBURLFilter();
-                urlFilter.UpdateFilterRules();
+				// Convert new URL Filter rules to XUL seb2 rules
+				// and add Start URL to allowed rules
+				SEBURLFilter urlFilter = new SEBURLFilter();
+				urlFilter.UpdateFilterRules();
 
-                // Create JSON object with XULRunner parameters to pass to firefox.exe as base64 string
-                var xulRunnerSettings = DeepClone(SEBSettings.settingsCurrent);
+				// Create JSON object with XULRunner parameters to pass to firefox.exe as base64 string
+				SEBSettings.settingsCurrent.Remove(SEBSettings.KeyBrowserMessagingSocket); // remove KeyBrowserMessagingSocket
+				SEBSettings.settingsCurrent.Add(SEBSettings.KeyBrowserMessagingSocket, SEBXULRunnerWebSocketServer.ServerAddress); // readd KeyBrowserMessagingSocket with current port
+				var xulRunnerSettings = DeepClone(SEBSettings.settingsCurrent);
 				string XULRunnerParameters = SEBXulRunnerSettings.XULRunnerConfigDictionarySerialize(xulRunnerSettings);
 				// Create the path to firefox.exe plus all arguments
 				StringBuilder xulRunnerPathBuilder = new StringBuilder(SEBClientInfo.XulRunnerExePath);
@@ -532,7 +535,7 @@ namespace SebWindowsClient
 			}
 			catch (Exception ex)
 			{
-				Logger.AddError("An error occurred starting XULRunner, path: "+xulRunnerPath+" desktop name: "+desktopName+" ", this, ex, ex.Message);
+				Logger.AddError("An error occurred starting XULRunner, path: " + xulRunnerPath + " desktop name: " + desktopName + " ", this, ex, ex.Message);
 				return false;
 			}
 		}
@@ -566,8 +569,8 @@ namespace SebWindowsClient
 			timer.Start();
 		}
 
-        public void ClosePreviousMainWindow()
-        {
+		public void ClosePreviousMainWindow()
+		{
 			Logger.AddInformation("Attempting to close previous browser window(s)...");
 
 			try
@@ -604,7 +607,7 @@ namespace SebWindowsClient
 			}
 		}
 
-        private void HandleXulRunnerProfile()
+		private void HandleXulRunnerProfile()
 		{
 			Logger.AddInformation("Attempting to handle Firefox profile folder...");
 
@@ -753,13 +756,13 @@ namespace SebWindowsClient
 			// First clear the permitted processes toolstrip/lists in case of a SEB restart
 
 			var start = 0;
-			if(!SEBXULRunnerWebSocketServer.HasBeenReconfiguredByMessage && !reconfiguring)
+			if (!SEBXULRunnerWebSocketServer.HasBeenReconfiguredByMessage && !reconfiguring)
 			{
 				taskbarToolStrip.Items.Clear();
 				permittedProcessesCalls.Clear();
 				permittedProcessesReferences.Clear();
 				permittedProcessesIconImages.Clear();
-            }
+			}
 			else
 			{
 				var tS = taskbarToolStrip.Items[0];
@@ -787,24 +790,24 @@ namespace SebWindowsClient
 				for (int i = start; i < permittedProcessList.Count; i++)
 				{
 					Dictionary<string, object> permittedProcess = (Dictionary<string, object>)permittedProcessList[i];
-					
+
 					//Do not kill permitted processses that are set to run in background
 					if ((bool)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyRunInBackground))
 						continue;
-					
+
 					SEBSettings.operatingSystems permittedProcessOS = (SEBSettings.operatingSystems)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyOS);
 					bool permittedProcessActive = (bool)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyActive);
 					if (permittedProcessOS == SEBSettings.operatingSystems.operatingSystemWin && permittedProcessActive)
 					{
 						string title = ((string)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyTitle));
-                        string executable = ((string)permittedProcess[SEBSettings.KeyExecutable]).ToLower();
-                        string originalName = ((string)permittedProcess[SEBSettings.KeyOriginalName]).ToLower();
-                        if (String.IsNullOrEmpty(title)) title = executable;
+						string executable = ((string)permittedProcess[SEBSettings.KeyExecutable]).ToLower();
+						string originalName = ((string)permittedProcess[SEBSettings.KeyOriginalName]).ToLower();
+						if (String.IsNullOrEmpty(title)) title = executable;
 						string identifier = ((string)permittedProcess[SEBSettings.KeyIdentifier]).ToLower();
-                        if (!(executable.Contains(SEBClientInfo.XUL_RUNNER) && 
-                            !(bool)SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyEnableSebBrowser)) && 
-                            !(title.Equals(SEBClientInfo.SEB_SHORTNAME) && 
-                            (executable.Equals("xulrunner.exe") || originalName.Equals("xulrunner.exe"))))
+						if (!(executable.Contains(SEBClientInfo.XUL_RUNNER) &&
+							!(bool)SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyEnableSebBrowser)) &&
+							!(title.Equals(SEBClientInfo.SEB_SHORTNAME) &&
+							(executable.Equals("xulrunner.exe") || originalName.Equals("xulrunner.exe"))))
 						{
 							// Check if the process is already running
 							//runningApplications = Process.GetProcesses();
@@ -847,7 +850,7 @@ namespace SebWindowsClient
 										}
 										else
 										{
-											title = title == SEBClientInfo.SEB_SHORTNAME ? (string) permittedProcess[SEBSettings.KeyExecutable] : title;
+											title = title == SEBClientInfo.SEB_SHORTNAME ? (string)permittedProcess[SEBSettings.KeyExecutable] : title;
 
 											if (!runningApplicationsToClose.ContainsKey(title))
 											{
@@ -937,7 +940,7 @@ namespace SebWindowsClient
 					ExitApplication();
 					return;
 				}
-			}            
+			}
 
 			// So if there are any permitted processes, we add them to the SEB taskbar
 			if (permittedProcessList.Count > 0)
@@ -960,16 +963,16 @@ namespace SebWindowsClient
 						string windowHandlingProcesses = (string)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyWindowHandlingProcess);
 						string title = (string)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyTitle);
 						string executable = (string)permittedProcess[SEBSettings.KeyExecutable];
-                        string originalName = ((string)permittedProcess[SEBSettings.KeyOriginalName]).ToLower();
-                        if (String.IsNullOrEmpty(title)) title = executable;
-                        // Do not add XULRunner to taskbar if browser is disabled and SEB if xulrunner.exe is executable or original name (settings generated in SEB 2.1.x)
-                        if (!(executable.Contains(SEBClientInfo.XUL_RUNNER) && 
-                            !(bool)SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyEnableSebBrowser)) && 
-                            !(title.Equals(SEBClientInfo.SEB_SHORTNAME) &&
-                            (executable.Equals("xulrunner.exe") || originalName.Equals("xulrunner.exe"))))
+						string originalName = ((string)permittedProcess[SEBSettings.KeyOriginalName]).ToLower();
+						if (String.IsNullOrEmpty(title)) title = executable;
+						// Do not add XULRunner to taskbar if browser is disabled and SEB if xulrunner.exe is executable or original name (settings generated in SEB 2.1.x)
+						if (!(executable.Contains(SEBClientInfo.XUL_RUNNER) &&
+							!(bool)SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyEnableSebBrowser)) &&
+							!(title.Equals(SEBClientInfo.SEB_SHORTNAME) &&
+							(executable.Equals("xulrunner.exe") || originalName.Equals("xulrunner.exe"))))
 
 						{
-                            var toolStripButton = new SEBToolStripButton();
+							var toolStripButton = new SEBToolStripButton();
 
 							//Do not add processes that do not have an Icon in Taskbar
 							if (!(Boolean)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyIconInTaskbar))
@@ -1085,7 +1088,7 @@ namespace SebWindowsClient
 
 			//Additional Resources Icons
 			FileCompressor.CleanupTempDirectory();
-			foreach (DictObj l0resource in ((ListObj) SEBSettings.settingsCurrent[SEBSettings.KeyAdditionalResources]))
+			foreach (DictObj l0resource in ((ListObj)SEBSettings.settingsCurrent[SEBSettings.KeyAdditionalResources]))
 			{
 				var active = l0resource.TryGetValue(SEBSettings.KeyAdditionalResourcesActive, out object a) && a is true;
 				var show = l0resource.TryGetValue(SEBSettings.KeyAdditionalResourcesShowButton, out object s) && s is true;
@@ -1112,8 +1115,8 @@ namespace SebWindowsClient
 					int volume = (int)SEBSettings.settingsCurrent[SEBSettings.KeyAudioVolumeLevel];
 					new AudioControl().SetVolumeScalar((float)volume / 100);
 				}
-                new AudioControl().Mute((bool)SEBSettings.settingsCurrent[SEBSettings.KeyAudioMute]);
-                if ((bool)SEBClientInfo.getSebSetting(SEBSettings.KeyAudioControlEnabled)[SEBSettings.KeyAudioControlEnabled])
+				new AudioControl().Mute((bool)SEBSettings.settingsCurrent[SEBSettings.KeyAudioMute]);
+				if ((bool)SEBClientInfo.getSebSetting(SEBSettings.KeyAudioControlEnabled)[SEBSettings.KeyAudioControlEnabled])
 				{
 					taskbarToolStrip.Items.Add(new SEBAudioToolStripButton());
 				}
@@ -1133,12 +1136,12 @@ namespace SebWindowsClient
 			}
 			catch (Exception ex)
 			{
-				Logger.AddError("Unable to add WLANControl",this,ex);
+				Logger.AddError("Unable to add WLANControl", this, ex);
 			}
 
 
 			// Add the OnScreenKeyboardControl (only if not in Create New Desktop Mode)
-			if ((Boolean) SEBClientInfo.getSebSetting(SEBSettings.KeyTouchOptimized)[SEBSettings.KeyTouchOptimized] == true && !(Boolean) SEBClientInfo.getSebSetting(SEBSettings.KeyCreateNewDesktop)[SEBSettings.KeyCreateNewDesktop])
+			if ((Boolean)SEBClientInfo.getSebSetting(SEBSettings.KeyTouchOptimized)[SEBSettings.KeyTouchOptimized] == true && !(Boolean)SEBClientInfo.getSebSetting(SEBSettings.KeyCreateNewDesktop)[SEBSettings.KeyCreateNewDesktop])
 			{
 				var sebOnScreenKeyboardToolStripButton = new SEBOnScreenKeyboardToolStripButton();
 				taskbarToolStrip.Items.Add(sebOnScreenKeyboardToolStripButton);
@@ -1166,15 +1169,15 @@ namespace SebWindowsClient
 			{
 				//Always add it, and hide it if connected to power source
 				//if (SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline)
-					taskbarToolStrip.Items.Add(new SEBBatterylifeToolStripButton());
+				taskbarToolStrip.Items.Add(new SEBBatterylifeToolStripButton());
 			}
 			catch (Exception ex)
 			{
-				Logger.AddError("Unable to add the Batterystatuscontrol",this,ex);
+				Logger.AddError("Unable to add the Batterystatuscontrol", this, ex);
 			}
 
 			//KeyboardLayout Chooser
-			if ((Boolean) SEBClientInfo.getSebSetting(SEBSettings.KeyShowInputLanguage)[SEBSettings.KeyShowInputLanguage] == true)
+			if ((Boolean)SEBClientInfo.getSebSetting(SEBSettings.KeyShowInputLanguage)[SEBSettings.KeyShowInputLanguage] == true)
 			{
 				taskbarToolStrip.Items.Add(new SEBInputLanguageToolStripButton());
 			}
@@ -1208,18 +1211,18 @@ namespace SebWindowsClient
 						Process newProcess = null;
 						if ((Boolean)permittedProcess[SEBSettings.KeyAutostart])
 						{
-                            Logger.AddInformation("Permitted process to start automatically (autostart = true): " + executable);
-                            string fullPathArgumentsCall = permittedProcessesCalls[permittedProcessesIndex];
-                            if (fullPathArgumentsCall != null)
-                            {
-                                Logger.AddInformation("Adding permitted process to autostart with path/arguments " + fullPathArgumentsCall);
-                                newProcess = CreateProcessWithExitHandler(fullPathArgumentsCall);
-                            }
-                            else
-                            {
-                                Logger.AddWarning("Permitted process wasn't added to autostart, because it didn't had a valid path/arguments call set", null);
-                                newProcess = null;
-                            }
+							Logger.AddInformation("Permitted process to start automatically (autostart = true): " + executable);
+							string fullPathArgumentsCall = permittedProcessesCalls[permittedProcessesIndex];
+							if (fullPathArgumentsCall != null)
+							{
+								Logger.AddInformation("Adding permitted process to autostart with path/arguments " + fullPathArgumentsCall);
+								newProcess = CreateProcessWithExitHandler(fullPathArgumentsCall);
+							}
+							else
+							{
+								Logger.AddWarning("Permitted process wasn't added to autostart, because it didn't had a valid path/arguments call set", null);
+								newProcess = null;
+							}
 						}
 						// Save the process reference if the process was started, otherwise null
 						permittedProcessesReferences.Add(newProcess);
@@ -1234,9 +1237,9 @@ namespace SebWindowsClient
 							permittedProcessesReferences.Add(xulRunner);
 						}
 					}
-                    permittedProcessesIndex++;
-                }
-            }
+					permittedProcessesIndex++;
+				}
+			}
 
 			SEBToForeground();
 		}
@@ -1250,7 +1253,7 @@ namespace SebWindowsClient
 		private Icon GetApplicationIcon(string fullPath)
 		{
 			Icon processIcon;
-			
+
 			try
 			{
 				processIcon = Icon.ExtractAssociatedIcon(fullPath);
@@ -1313,8 +1316,8 @@ namespace SebWindowsClient
 		{
 			string executable = (string)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyExecutable);
 			if (executable == null) executable = "";
-			string originalName = (string) SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyOriginalName) ?? string.Empty;
-			string executablePath = (string) SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyPath);
+			string originalName = (string)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyOriginalName) ?? string.Empty;
+			string executablePath = (string)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyPath);
 			if (executablePath == null) executablePath = "";
 			bool allowChoosingApp = (bool)SEBSettings.valueForDictionaryKey(permittedProcess, SEBSettings.KeyAllowUser);
 			//if (allowChoosingApp == null) allowChoosingApp = false;
@@ -1336,7 +1339,7 @@ namespace SebWindowsClient
 				fullPath = path + executable;
 				// Maybe the executablePath information wasn't necessary to find the application, then we return this found path
 				if (File.Exists(fullPath)) return fullPath;
- 
+
 				// But maybe the executable path is a relative path from the applications main directory to some subdirectory with the executable in it?
 				fullPath = path + executablePath + "\\" + executable;
 				if (File.Exists(fullPath)) return fullPath;
@@ -1434,7 +1437,7 @@ namespace SebWindowsClient
 							processReference =
 								SEBWindowHandler.GetWindowHandleByTitle(toolStripButton.Identifier).GetProcess();
 
-						new WindowChooser(processReference, ((ToolStripButton) sender).Bounds.X,
+						new WindowChooser(processReference, ((ToolStripButton)sender).Bounds.X,
 							Screen.PrimaryScreen.Bounds.Height - taskbarHeight);
 					}
 				}
@@ -1479,7 +1482,7 @@ namespace SebWindowsClient
 		/// ----------------------------------------------------------------------------------------
 		private bool SetFormOnDesktop()
 		{
-			if (!(bool) SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyShowTaskBar))
+			if (!(bool)SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyShowTaskBar))
 			{
 				return false;
 			}
@@ -1491,21 +1494,21 @@ namespace SebWindowsClient
 			}
 			scaleFactor = dpiX / 96;
 			SEBClientInfo.scaleFactor = scaleFactor;
-			Logger.AddInformation("Current display DPI setting: " + dpiX.ToString() + " and scale factor: " +scaleFactor.ToString());
+			Logger.AddInformation("Current display DPI setting: " + dpiX.ToString() + " and scale factor: " + scaleFactor.ToString());
 
-			float sebTaskBarHeight = (int) SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyTaskBarHeight);
+			float sebTaskBarHeight = (int)SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyTaskBarHeight);
 			if ((Boolean)SEBClientInfo.getSebSetting(SEBSettings.KeyTouchOptimized)[SEBSettings.KeyTouchOptimized] == true)
 			{
 				taskbarHeight = (int)(sebTaskBarHeight * 1.7 * scaleFactor);
-				this.taskbarToolStrip.ImageScalingSize = new Size(taskbarHeight - 8, taskbarHeight -8);
+				this.taskbarToolStrip.ImageScalingSize = new Size(taskbarHeight - 8, taskbarHeight - 8);
 			}
 			else
 			{
 				taskbarHeight = (int)(sebTaskBarHeight * scaleFactor);
-				this.taskbarToolStrip.ImageScalingSize = new Size(taskbarHeight - 8, taskbarHeight -8);
+				this.taskbarToolStrip.ImageScalingSize = new Size(taskbarHeight - 8, taskbarHeight - 8);
 			}
 
-			Logger.AddInformation("Taskbar height from settings: " +sebTaskBarHeight.ToString() + " Current taskbar height: " + taskbarHeight.ToString());
+			Logger.AddInformation("Taskbar height from settings: " + sebTaskBarHeight.ToString() + " Current taskbar height: " + taskbarHeight.ToString());
 
 			//Modify Working Area
 			SEBWorkingAreaHandler.SetTaskBarSpaceHeight(taskbarHeight);
@@ -1519,7 +1522,7 @@ namespace SebWindowsClient
 			this.TopMost = true;
 
 			PlaceFormOnDesktop(false, true);
-			
+
 			return true;
 		}
 
@@ -1543,7 +1546,7 @@ namespace SebWindowsClient
 			{
 				//Modify Working Area
 				SEBWorkingAreaHandler.SetTaskBarSpaceHeight(taskbarHeight);
-				if ((bool) SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyShowTaskBar))
+				if ((bool)SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyShowTaskBar))
 				{
 					int width = Screen.PrimaryScreen.Bounds.Width;
 					var x = 0;
@@ -1554,7 +1557,7 @@ namespace SebWindowsClient
 					this.Show();
 				}
 
-				if ((bool) SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyTouchOptimized))
+				if ((bool)SEBSettings.valueForDictionaryKey(SEBSettings.settingsCurrent, SEBSettings.KeyTouchOptimized))
 				{
 					var topWindow = SEBWindowHandler.GetOpenWindows().FirstOrDefault();
 					if (topWindow.Value != null)
@@ -1583,7 +1586,7 @@ namespace SebWindowsClient
 			// the user will be asked to quit all those processes him/herself or to let SEB kill them
 			// Prohibited processes with the strongKill flag set can be killed without user consent
 
-			var prohibitedProcessList = (List<object>) SEBClientInfo.getSebSetting(SEBSettings.KeyProhibitedProcesses)[SEBSettings.KeyProhibitedProcesses];
+			var prohibitedProcessList = (List<object>)SEBClientInfo.getSebSetting(SEBSettings.KeyProhibitedProcesses)[SEBSettings.KeyProhibitedProcesses];
 			var infos = SEBProcessHandler.GetExecutableInfos();
 
 			if (prohibitedProcessList.Any())
@@ -1715,7 +1718,7 @@ namespace SebWindowsClient
 				else
 				{
 					SetForegroundWindow(this.Handle);
-					if ((bool) SEBSettings.settingsCurrent[SEBSettings.KeyTouchOptimized])
+					if ((bool)SEBSettings.settingsCurrent[SEBSettings.KeyTouchOptimized])
 					{
 						sebCloseDialogForm.InitializeForTouch();
 					}
@@ -1723,7 +1726,7 @@ namespace SebWindowsClient
 					{
 						sebCloseDialogForm.InitializeForNonTouch();
 					}
-					
+
 
 					// Show testDialog as a modal dialog and determine if DialogResult = OK.
 					sebCloseDialogForm.Visible = true;
@@ -1796,19 +1799,19 @@ namespace SebWindowsClient
 
 			// Check if VM and SEB Windows Service available and required
 			try
-            {
-                SebWindowsClientMain.CheckIfTabletModeIsEnabled();
-                SebWindowsClientMain.CheckIfInsideVirtualMachine();
-                SebWindowsClientMain.CheckIfRunViaRemoteConnection();
-                SebWindowsClientMain.CheckServicePolicy(SebWindowsServiceHandler.IsServiceAvailable);
+			{
+				SebWindowsClientMain.CheckIfTabletModeIsEnabled();
+				SebWindowsClientMain.CheckIfInsideVirtualMachine();
+				SebWindowsClientMain.CheckIfRunViaRemoteConnection();
+				SebWindowsClientMain.CheckServicePolicy(SebWindowsServiceHandler.IsServiceAvailable);
 
-                // Set Registry Values to lock down CTRL+ALT+DELETE Menu (with SEBWindowsServiceWCF)
-                try
-                {
-                    if (SebWindowsServiceHandler.IsServiceAvailable)
-                    {
-						var policy = (int) SEBClientInfo.getSebSetting(SEBSettings.KeySebServicePolicy)[SEBSettings.KeySebServicePolicy];
-						var forceService = policy == (int) sebServicePolicies.forceSebService;
+				// Set Registry Values to lock down CTRL+ALT+DELETE Menu (with SEBWindowsServiceWCF)
+				try
+				{
+					if (SebWindowsServiceHandler.IsServiceAvailable)
+					{
+						var policy = (int)SEBClientInfo.getSebSetting(SEBSettings.KeySebServicePolicy)[SEBSettings.KeySebServicePolicy];
+						var forceService = policy == (int)sebServicePolicies.forceSebService;
 
 						Logger.AddInformation("Setting registry values...");
 
@@ -1829,61 +1832,61 @@ namespace SebWindowsClient
 							Logger.AddWarning("Failed to set registry values!", this, null);
 							SEBMessageBox.Show(SEBUIStrings.ServiceFailedTitle, SEBUIStrings.ServiceFailed, MessageBoxIcon.Warning, MessageBoxButtons.OK);
 						}
-                    }
+					}
 					else
 					{
-                        SebWindowsClientMain.CheckServicePolicy(false);
+						SebWindowsClientMain.CheckServicePolicy(false);
 					}
-                }
-                catch (SEBNotAllowedToRunEception ex)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    Logger.AddError("Unable to set Registry values", this, ex);
-                    SebWindowsClientMain.CheckServicePolicy(false);
-                }
+				}
+				catch (SEBNotAllowedToRunEception ex)
+				{
+					throw;
+				}
+				catch (Exception ex)
+				{
+					Logger.AddError("Unable to set Registry values", this, ex);
+					SebWindowsClientMain.CheckServicePolicy(false);
+				}
 
-                //Disable windows update service (with SEBWindowsServiceWCF)
-                try
-                {
-                    Logger.AddInformation("disabling windows update");
-                    if (SebWindowsServiceHandler.IsServiceAvailable && !SebWindowsServiceHandler.DisableWindowsUpdate())
-                        Logger.AddWarning("Unable to disable windows upate service", this, null);
-                }
-                catch (Exception ex)
-                {
-                    Logger.AddError("Unable to disable windows update service", this, ex);
-                }
+				//Disable windows update service (with SEBWindowsServiceWCF)
+				try
+				{
+					Logger.AddInformation("disabling windows update");
+					if (SebWindowsServiceHandler.IsServiceAvailable && !SebWindowsServiceHandler.DisableWindowsUpdate())
+						Logger.AddWarning("Unable to disable windows upate service", this, null);
+				}
+				catch (Exception ex)
+				{
+					Logger.AddError("Unable to disable windows update service", this, ex);
+				}
 
-                try
-                {
-                    Logger.AddInformation("killing processes that are not allowed to run");
-                    var res = CheckProhibitedProcesses();
-                }
-                catch (Exception ex)
-                {
-                    Logger.AddError("Unable to kill processes that are running before start", this, ex);
-                }
+				try
+				{
+					Logger.AddInformation("killing processes that are not allowed to run");
+					var res = CheckProhibitedProcesses();
+				}
+				catch (Exception ex)
+				{
+					Logger.AddError("Unable to kill processes that are running before start", this, ex);
+				}
 
 
-                Logger.AddInformation("attempting to start socket server");
-                SEBXULRunnerWebSocketServer.StartServer();
-                SEBXULRunnerWebSocketServer.OnXulRunnerFullscreenchanged += opts =>
-                {
-                    if (opts.fullscreen == true)
-                    {
-                        this.BeginInvoke(new Action(this.Hide));
-                    }
-                    else
-                    {
-                        this.BeginInvoke(new Action(this.Show));
-                    }
-                };
+				Logger.AddInformation("attempting to start socket server");
+				//SEBXULRunnerWebSocketServer.StartServer(); // changed startup of server to port aquire part
+				SEBXULRunnerWebSocketServer.OnXulRunnerFullscreenchanged += opts =>
+				{
+					if (opts.fullscreen == true)
+					{
+						this.BeginInvoke(new Action(this.Hide));
+					}
+					else
+					{
+						this.BeginInvoke(new Action(this.Show));
+					}
+				};
 
-                // Disable unwanted keys.
-                SebKeyCapture.FilterKeys = true;
+				// Disable unwanted keys.
+				SebKeyCapture.FilterKeys = true;
 
 				try
 				{
@@ -1895,42 +1898,42 @@ namespace SebWindowsClient
 				}
 
 				try
-                {
-                    Logger.AddInformation("adding allowed processes to taskbar");
-                    addPermittedProcessesToTS(reconfiguring && !isStartup);
-                }
-                catch (Exception ex)
-                {
-                    Logger.AddError("Unable to addPermittedProcessesToTS", this, ex);
-                }
+				{
+					Logger.AddInformation("adding allowed processes to taskbar");
+					addPermittedProcessesToTS(reconfiguring && !isStartup);
+				}
+				catch (Exception ex)
+				{
+					Logger.AddError("Unable to addPermittedProcessesToTS", this, ex);
+				}
 
-                //if none of the two kiosk modes are enabled, then we do not monitor the processes, otherwise we monitor the processes. The switch for monitoring processes has no longer any function.
-                if ((bool)SEBSettings.settingsCurrent[SEBSettings.KeyKillExplorerShell] || (bool)SEBSettings.settingsCurrent[SEBSettings.KeyCreateNewDesktop])
-                {
-                    Logger.AddInformation("checking for processes that are starting from now on");
-                    MonitorProcesses();
-                }
+				//if none of the two kiosk modes are enabled, then we do not monitor the processes, otherwise we monitor the processes. The switch for monitoring processes has no longer any function.
+				if ((bool)SEBSettings.settingsCurrent[SEBSettings.KeyKillExplorerShell] || (bool)SEBSettings.settingsCurrent[SEBSettings.KeyCreateNewDesktop])
+				{
+					Logger.AddInformation("checking for processes that are starting from now on");
+					MonitorProcesses();
+				}
 
-                if (sebCloseDialogForm == null)
-                {
-                    Logger.AddInformation("creating close dialog form");
-                    sebCloseDialogForm = new SebCloseDialogForm();
-                    sebCloseDialogForm.TopMost = true;
-                }
-                if (sebApplicationChooserForm == null)
-                {
-                    Logger.AddInformation("building application chooser form");
-                    sebApplicationChooserForm = new SebApplicationChooserForm();
-                    sebApplicationChooserForm.TopMost = true;
-                    sebApplicationChooserForm.Show();
-                    sebApplicationChooserForm.Visible = false;
-                }
+				if (sebCloseDialogForm == null)
+				{
+					Logger.AddInformation("creating close dialog form");
+					sebCloseDialogForm = new SebCloseDialogForm();
+					sebCloseDialogForm.TopMost = true;
+				}
+				if (sebApplicationChooserForm == null)
+				{
+					Logger.AddInformation("building application chooser form");
+					sebApplicationChooserForm = new SebApplicationChooserForm();
+					sebApplicationChooserForm.TopMost = true;
+					sebApplicationChooserForm.Show();
+					sebApplicationChooserForm.Visible = false;
+				}
 
 				isStartup = false;
 
-                return true;
-            }
-            catch (SEBNotAllowedToRunEception ex)
+				return true;
+			}
+			catch (SEBNotAllowedToRunEception ex)
 			{
 				// VM or service not available and set to be required
 				Logger.AddInformation(string.Format("exiting without starting up because {0}", ex.Message));
@@ -1983,30 +1986,30 @@ namespace SebWindowsClient
 		}
 
 		private static void MonitorProcesses()
-        {
-            //Handle prohibited executables watching
-            SEBProcessHandler.ProhibitedExecutables.Clear();
-            //Add prohibited executables
-            foreach (Dictionary<string, object> process in SEBSettings.prohibitedProcessList)
-            {
-                if ((bool)process[SEBSettings.KeyActive])
-                {
-                    var name = Path.GetFileNameWithoutExtension((string)process[SEBSettings.KeyExecutable] ?? string.Empty);
-                    var originalName = Path.GetFileNameWithoutExtension((string)process[SEBSettings.KeyOriginalName] ?? string.Empty);
+		{
+			//Handle prohibited executables watching
+			SEBProcessHandler.ProhibitedExecutables.Clear();
+			//Add prohibited executables
+			foreach (Dictionary<string, object> process in SEBSettings.prohibitedProcessList)
+			{
+				if ((bool)process[SEBSettings.KeyActive])
+				{
+					var name = Path.GetFileNameWithoutExtension((string)process[SEBSettings.KeyExecutable] ?? string.Empty);
+					var originalName = Path.GetFileNameWithoutExtension((string)process[SEBSettings.KeyOriginalName] ?? string.Empty);
 
-                    SEBProcessHandler.ProhibitedExecutables.Add(new ExecutableInfo(name, originalName));
-                }
-            }
+					SEBProcessHandler.ProhibitedExecutables.Add(new ExecutableInfo(name, originalName));
+				}
+			}
 
-            //This prevents the prohibited executables from starting up
-            try
-            {
-                SEBProcessHandler.EnableProcessWatchDog();
-            }
-            catch (Exception ex)
-            {
-                Logger.AddError("Unable to EnableProcessWatchDog", null, ex);
-            }
+			//This prevents the prohibited executables from starting up
+			try
+			{
+				SEBProcessHandler.EnableProcessWatchDog();
+			}
+			catch (Exception ex)
+			{
+				Logger.AddError("Unable to EnableProcessWatchDog", null, ex);
+			}
 
 			//This prevents the not allowed executables from poping up
 			try
@@ -2019,12 +2022,12 @@ namespace SebWindowsClient
 			}
 		}
 
-        /// ----------------------------------------------------------------------------------------
-        /// <summary>
-        /// Close SEB Form.
-        /// </summary>
-        /// ----------------------------------------------------------------------------------------
-        public void CloseSEBForm(bool reconfiguring = false)
+		/// ----------------------------------------------------------------------------------------
+		/// <summary>
+		/// Close SEB Form.
+		/// </summary>
+		/// ----------------------------------------------------------------------------------------
+		public void CloseSEBForm(bool reconfiguring = false)
 		{
 			if (!reconfiguring)
 			{
@@ -2051,7 +2054,7 @@ namespace SebWindowsClient
 			}
 			catch (Exception ex)
 			{
-				Logger.AddError("Unable to reset Registry values",this,ex);
+				Logger.AddError("Unable to reset Registry values", this, ex);
 			}
 
 			try
@@ -2062,7 +2065,7 @@ namespace SebWindowsClient
 			}
 			catch (Exception ex)
 			{
-				Logger.AddError("Unable to reset WorkingArea",this,ex);
+				Logger.AddError("Unable to reset WorkingArea", this, ex);
 			}
 
 			// ShutDown Processes
@@ -2070,7 +2073,7 @@ namespace SebWindowsClient
 			//Deregister SEB closed Event
 			if (xulRunner != null)
 			{
-				xulRunner.Exited -= XulRunner_Exited;   
+				xulRunner.Exited -= XulRunner_Exited;
 			}
 
 			Logger.AddInformation("closing processes that where started by seb");
@@ -2106,14 +2109,14 @@ namespace SebWindowsClient
 						}
 
 						Logger.AddInformation("Attempting to close " + proc.ProcessName);
-						SEBNotAllowedProcessController.CloseProcess(proc);   
+						SEBNotAllowedProcessController.CloseProcess(proc);
 					}
 				}
 				catch (Exception ex)
 				{
-					Logger.AddError("Unable to Shutdown Process",null, ex);
+					Logger.AddError("Unable to Shutdown Process", null, ex);
 				}
-					
+
 			}
 			Logger.AddInformation("clearing running processes list");
 			//permittedProcessesReferences.Clear();
@@ -2149,7 +2152,7 @@ namespace SebWindowsClient
 				}
 				catch (Exception ex)
 				{
-					Logger.AddError("Unable to StartExplorerShell",null,ex);
+					Logger.AddError("Unable to StartExplorerShell", null, ex);
 				}
 			}
 
@@ -2173,7 +2176,7 @@ namespace SebWindowsClient
 		public void ExitApplication(bool showLoadingScreen = true)
 		{
 			// Only show the loading screen when not in CreateNewDesktop-Mode
-			if ((bool) SEBSettings.settingsCurrent[SEBSettings.KeyCreateNewDesktop])
+			if ((bool)SEBSettings.settingsCurrent[SEBSettings.KeyCreateNewDesktop])
 			{
 				showLoadingScreen = false;
 			}
